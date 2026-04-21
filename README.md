@@ -21,7 +21,7 @@ Web app to:
    - `GOOGLE_CLIENT_SECRET`
    - `NEXTAUTH_SECRET`
    - `GOOGLE_SHEET_ID`
-5. Place your fixed resume at `storage/resume.pdf` (or set custom `RESUME_PATH`).
+5. Place your fixed resume at `public/resume.pdf` (or set custom `RESUME_PATH`).
 
 ## Google Sheet format
 
