@@ -223,9 +223,8 @@ export async function getRecentLogs(accessToken: string, limit = 20) {
 
   return rows
     .slice(1)
-    .reverse()
-    .slice(0, limit)
-    .map((row) => ({
+    .map((row, index) => ({
+      rowIndex: index + 2,
       serialNumber: row[0],
       name: row[1],
       company: row[2],
@@ -240,7 +239,9 @@ export async function getRecentLogs(accessToken: string, limit = 20) {
       threadId: row[11],
       followUpCount: parseInt(row[12] || "0", 10),
       sentiment: row[13] || "Neutral",
-    }));
+    }))
+    .reverse()
+    .slice(0, limit);
 }
 
 export async function getAutomationConfig(accessToken: string) {

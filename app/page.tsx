@@ -21,6 +21,18 @@ type BulkResult = {
   error?: string;
 };
 
+type RecentLog = {
+  name: string;
+  company: string;
+  status: string;
+  sentiment: string;
+  followUpDate: string;
+  followUpCount: number;
+  rowIndex: number;
+  email: string;
+  subject?: string;
+};
+
 type LogEntry = {
   id: string;
   time: string;
@@ -57,7 +69,7 @@ export default function Home() {
     message: "System initialized. Ready to send emails."
   }]);
   
-  const [recentLogs, setRecentLogs] = useState<any[]>([]);
+  const [recentLogs, setRecentLogs] = useState<RecentLog[]>([]);
   const [automationMode, setAutomationMode] = useState<"automatic" | "manual">("manual");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<"outreach" | "command">("outreach");

@@ -14,18 +14,22 @@ export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
   let accessToken = session?.accessToken;
 
-  // For Cron, we'd need a stored token, but for now we fallback to session
-  // or a system-wide token if the user provided one.
-  if (!accessToken && !isCron) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // IMPORTANT: For headless cron to work via Vercel, it needs a valid accessToken.
+  // Since we don't have a database, the cron will only succeed if a user has a valid
+  // session or if we implement a persistent token system later.
+  if (!accessToken && isCron) {
+    console.error("Cron triggered but no active session found for accessToken. Automation skipped.");
+    return NextResponse.json({ error: "No active session for Cron execution. Automated follow-ups require a valid OAuth token." }, { status: 401 });
   }
 
-  // NOTE: Headless cron with OAuth requires refresh token logic.
-  // For this project, we prioritize the manual trigger and "Manual" mode visibility.
+  if (!accessToken) {
+    return NextResponse.json({ error: "Unauthorized. Please sign in." }, { status: 401 });
+  }
 
   try {
-    const mode = await getAutomationConfig(accessToken!);
-    const contacts = await getContactsToFollowUp(accessToken!);
+    const token = accessToken as string;
+    const mode = await getAutomationConfig(token);
+    const contacts = await getContactsToFollowUp(token);
     const results = [];
 
     for (const contact of contacts) {
