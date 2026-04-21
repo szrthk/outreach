@@ -1,3 +1,5 @@
+import path from "node:path";
+
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
@@ -16,7 +18,7 @@ export async function POST(request: Request) {
       to: email,
       subject: subject,
       body: body,
-      attachmentPath: process.env.RESUME_PATH || "storage/resume.pdf",
+      attachmentPath: process.env.RESUME_PATH || path.join(process.cwd(), "public", "resume.pdf"),
     });
 
     const nextFollowUp = new Date();

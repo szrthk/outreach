@@ -93,9 +93,7 @@ export async function sendEmailWithAttachment({
   oauth2Client.setCredentials({ access_token: accessToken });
 
   const gmail = google.gmail({ version: "v1", auth: oauth2Client });
-  const absolutePath = path.isAbsolute(attachmentPath)
-    ? attachmentPath
-    : path.join(/*turbopackIgnore: true*/ process.cwd(), attachmentPath);
+  const absolutePath = attachmentPath;
 
   const attachmentBuffer = await fs.readFile(absolutePath);
   const attachmentName = path.basename(absolutePath);

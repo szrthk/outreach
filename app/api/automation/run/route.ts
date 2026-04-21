@@ -1,3 +1,5 @@
+import path from "node:path";
+
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
@@ -68,7 +70,7 @@ export async function POST(request: Request) {
             to: contact.email,
             subject: contact.subject || `Follow-up: ${contact.company}`,
             body: aiBody,
-            attachmentPath: process.env.RESUME_PATH || "storage/resume.pdf",
+            attachmentPath: process.env.RESUME_PATH || path.join(process.cwd(), "public", "resume.pdf"),
           });
 
           const nextFollowUp = new Date();
