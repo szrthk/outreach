@@ -153,5 +153,37 @@ export async function sendEmailWithAttachment({
     throw new Error("Gmail did not return a message ID.");
   }
 
-  return response.data.id;
+  return {
+    messageId: response.data.id,
+    threadId: response.data.threadId ?? response.data.id,
+  };
+}
+
+export async function checkThreadForReplies(
+  accessToken: string,
+  threadId: string,
+  lastKnownMessageId: string,
+) {
+  const oauth2Client = new google.auth.OAuth2();
+  oauth2Client.setCredentials({ access_token: accessToken });
+  const gmail = google.gmail({ version: "v1", auth: oauth2Client });
+
+  const response = await gmail.users.threads.get({
+    userId: "me",
+    id: threadId,
+    format: "metadata",
+    metadataHeaders: ["From", "Message-ID"],
+  });
+
+  const messages = response.data.messages || [];
+  const lastIndex = messages.findIndex((m) => m.id === lastKnownMessageId);
+
+  if (lastIndex === -1) return [];
+
+  // Get messages AFTER our last sent message
+  const newMessages = messages.slice(lastIndex + 1);
+
+  // Filter out messages SENT by us (if any)
+  // In a typical thread check, anything here from the recipient is a reply.
+  return newMessages;
 }

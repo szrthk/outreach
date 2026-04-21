@@ -91,7 +91,7 @@ export async function POST(request: Request) {
     const emailBody = renderTemplate(templates.body, contact);
 
     try {
-      const messageId = await sendEmailWithAttachment({
+      const { messageId, threadId } = await sendEmailWithAttachment({
         accessToken,
         to: contact.email.trim(),
         subject,
@@ -106,6 +106,8 @@ export async function POST(request: Request) {
         subject,
         status: "sent",
         messageId,
+        threadId,
+        followUpCount: 0,
       });
 
       results.push({

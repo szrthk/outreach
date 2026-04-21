@@ -66,6 +66,36 @@ export default function Home() {
     }),
     [single],
   );
+
+  const [aiHook, setAiHook] = useState("");
+  const [isGeneratingHook, setIsGeneratingHook] = useState(false);
+
+  async function suggestHook() {
+    if (!single.company) {
+      addLog("error", "Please enter a company name first.");
+      return;
+    }
+    
+    setIsGeneratingHook(true);
+    addLog("info", `Generating AI hook for ${single.company}...`);
+
+    try {
+      const response = await fetch("/api/ai/hook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ company: single.company }),
+      });
+      const result = await response.json();
+      if (result.hook) {
+        setAiHook(result.hook);
+        addLog("success", "AI Hook generated!");
+      }
+    } catch (error) {
+      addLog("error", "Failed to generate AI hook.");
+    } finally {
+      setIsGeneratingHook(false);
+    }
+  }
   
   const addLog = (type: "info" | "success" | "error", message: string) => {
     setLogs(prev => [...prev, {
@@ -152,6 +182,36 @@ export default function Home() {
     }
   }
 
+  async function runAutomation() {
+    setIsSendingBulk(true); // Reusing bulk state for progress indication
+    addLog("info", "Starting AI Automation: Checking for replies and sending follow-ups...");
+
+    try {
+      const response = await fetch("/api/automation/run", {
+        method: "POST",
+      });
+      const result = (await response.json()) as {
+        success?: boolean;
+        processed?: number;
+        results?: any[];
+        error?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(result.error ?? "Automation engine failed.");
+      }
+
+      addLog("success", `Automation complete. Processed ${result.processed} contacts.`);
+      result.results?.forEach(res => {
+        addLog("info", `Contact ${res.email}: ${res.action} ${res.sentiment ? `(Sentiment: ${res.sentiment})` : ""}`);
+      });
+    } catch (error) {
+      addLog("error", error instanceof Error ? error.message : "Unexpected automation error.");
+    } finally {
+      setIsSendingBulk(false);
+    }
+  }
+
   function onCsvUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) {
@@ -207,6 +267,16 @@ export default function Home() {
             <p>Fill details, log automatically, standard bulk operations</p>
           </div>
           <div className={styles.authContainer}>
+            <button 
+              type="button" 
+              onClick={runAutomation} 
+              className={styles.secondaryButton}
+              disabled={isSendingBulk}
+              style={{ marginRight: '1rem', border: '1px solid var(--accent-light)' }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '8px', verticalAlign: 'middle'}}><path d="m12 8-1 1H9l-1 1v2l1 1h2l1 1 1-1h1v-1l1-1v-2l-1-1h-1z"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+              Run AI Follow-ups
+            </button>
             <span>{session?.user?.email}</span>
             <button type="button" onClick={() => signOut()} className={styles.secondaryButton}>
               Sign out
@@ -237,13 +307,30 @@ export default function Home() {
                 </label>
                 <label>
                   Company
-                  <input
-                    placeholder="Google"
-                    value={single.company}
-                    onChange={(event) => setSingle((prev) => ({ ...prev, company: event.target.value }))}
-                  />
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input
+                      placeholder="Google"
+                      value={single.company}
+                      onChange={(event) => setSingle((prev) => ({ ...prev, company: event.target.value }))}
+                      style={{ flex: 1 }}
+                    />
+                    <button 
+                      type="button" 
+                      onClick={suggestHook} 
+                      className={styles.secondaryButton}
+                      disabled={isGeneratingHook || !single.company}
+                    >
+                      {isGeneratingHook ? "..." : "✨ Hook"}
+                    </button>
+                  </div>
                 </label>
               </div>
+              {aiHook && (
+                <div style={{ marginBottom: '1.5rem', padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', borderLeft: '3px solid var(--accent-light)' }}>
+                   <p style={{fontSize: '0.85rem', margin: '0 0 4px', opacity: 0.7}}>AI Suggested Hook:</p>
+                   <p style={{fontStyle: 'italic', margin: 0, fontSize: '0.95rem'}}>{aiHook}</p>
+                </div>
+              )}
               <button
                 type="button"
                 className={styles.primaryButton}

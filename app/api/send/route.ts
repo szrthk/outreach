@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     process.env.RESUME_PATH ?? path.join(process.cwd(), "storage", "resume.pdf");
 
   try {
-    const messageId = await sendEmailWithAttachment({
+    const { messageId, threadId } = await sendEmailWithAttachment({
       accessToken,
       to: contact.email.trim(),
       subject,
@@ -61,9 +61,11 @@ export async function POST(request: Request) {
       subject,
       status: "sent",
       messageId,
+      threadId,
+      followUpCount: 0,
     });
 
-    return NextResponse.json({ status: "sent", messageId, sheetLogError });
+    return NextResponse.json({ status: "sent", messageId, threadId, sheetLogError });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown send failure";
 
