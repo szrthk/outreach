@@ -37,6 +37,7 @@
   font-weight: 700;
   background: linear-gradient(to right, #fff, #b3b3b3);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 8px;
 }
@@ -133,6 +134,7 @@
   font-weight: 800;
   background: linear-gradient(135deg, #fff 0%, #a8a8a8 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 .hero p {
