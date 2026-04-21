@@ -18,7 +18,11 @@ export async function POST(request: Request) {
       to: email,
       subject: subject,
       body: body,
-      attachmentPath: process.env.RESUME_PATH || path.join(process.cwd(), "public", "resume.pdf"),
+      attachmentPath:
+        process.env.RESUME_PATH &&
+        process.env.RESUME_PATH !== "storage/resume.pdf"
+          ? process.env.RESUME_PATH
+          : path.join(process.cwd(), "public", "resume.pdf"),
     });
 
     const nextFollowUp = new Date();

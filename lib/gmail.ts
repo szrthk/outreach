@@ -93,9 +93,18 @@ export async function sendEmailWithAttachment({
   oauth2Client.setCredentials({ access_token: accessToken });
 
   const gmail = google.gmail({ version: "v1", auth: oauth2Client });
-  const absolutePath = path.isAbsolute(attachmentPath)
+  let absolutePath = path.isAbsolute(attachmentPath)
     ? attachmentPath
     : path.resolve(process.cwd(), attachmentPath);
+
+  try {
+    await fs.access(absolutePath);
+  } catch (err) {
+    console.warn(
+      `Attachment not found at ${absolutePath}, falling back to public/resume.pdf`
+    );
+    absolutePath = path.join(process.cwd(), "public", "resume.pdf");
+  }
 
   const attachmentBuffer = await fs.readFile(absolutePath);
   const attachmentName = path.basename(absolutePath);

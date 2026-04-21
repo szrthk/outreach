@@ -55,7 +55,9 @@ export async function POST(request: Request) {
   }
 
   const attachmentPath =
-    process.env.RESUME_PATH ?? path.join(process.cwd(), "public", "resume.pdf");
+    process.env.RESUME_PATH && process.env.RESUME_PATH !== "storage/resume.pdf"
+      ? process.env.RESUME_PATH
+      : path.join(process.cwd(), "public", "resume.pdf");
   const templates = getEmailTemplates();
   const seenEmails = new Set<string>();
   const results: BulkResult[] = [];

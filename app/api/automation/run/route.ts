@@ -70,7 +70,11 @@ export async function POST(request: Request) {
             to: contact.email,
             subject: contact.subject || `Follow-up: ${contact.company}`,
             body: aiBody,
-            attachmentPath: process.env.RESUME_PATH || path.join(process.cwd(), "public", "resume.pdf"),
+            attachmentPath:
+              process.env.RESUME_PATH &&
+              process.env.RESUME_PATH !== "storage/resume.pdf"
+                ? process.env.RESUME_PATH
+                : path.join(process.cwd(), "public", "resume.pdf"),
           });
 
           const nextFollowUp = new Date();
