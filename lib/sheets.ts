@@ -109,6 +109,7 @@ export async function appendLogRow(accessToken: string, row: SheetLogRow) {
           row.threadId ?? "",
           row.followUpCount ?? 0,
           row.sentiment ?? "",
+          row.subject,
         ],
       ],
     },
@@ -117,7 +118,7 @@ export async function appendLogRow(accessToken: string, row: SheetLogRow) {
 
 export async function getContactsToFollowUp(accessToken: string) {
   const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-  const range = process.env.GOOGLE_SHEET_RANGE ?? "Sheet1!A:N";
+  const range = process.env.GOOGLE_SHEET_RANGE ?? "Sheet1!A:O";
 
   if (!spreadsheetId) throw new Error("GOOGLE_SHEET_ID missing");
 
@@ -154,6 +155,7 @@ export async function getContactsToFollowUp(accessToken: string) {
       threadId: row[11],
       followUpCount: parseInt(row[12] || "0", 10),
       sentiment: row[13],
+      subject: row[14],
     }))
     .filter((contact) => {
       if (contact.status !== "No Reply") return false;
@@ -204,7 +206,7 @@ export async function updateLogRow(
 
 export async function getRecentLogs(accessToken: string, limit = 20) {
   const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-  const range = process.env.GOOGLE_SHEET_RANGE ?? "Sheet1!A:N";
+  const range = process.env.GOOGLE_SHEET_RANGE ?? "Sheet1!A:O";
 
   if (!spreadsheetId) throw new Error("GOOGLE_SHEET_ID missing");
 
@@ -238,6 +240,7 @@ export async function getRecentLogs(accessToken: string, limit = 20) {
       threadId: row[11],
       followUpCount: parseInt(row[12] || "0", 10),
       sentiment: row[13] || "Neutral",
+      subject: row[14],
     }))
     .reverse()
     .slice(0, limit);

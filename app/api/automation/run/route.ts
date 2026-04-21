@@ -66,7 +66,7 @@ export async function POST(request: Request) {
           const { messageId } = await sendEmailWithAttachment({
             accessToken: token,
             to: contact.email,
-            subject: contact.subject,
+            subject: contact.subject || `Follow-up: ${contact.company}`,
             body: aiBody,
             attachmentPath: process.env.RESUME_PATH || "storage/resume.pdf",
           });
