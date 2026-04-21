@@ -62,7 +62,7 @@ async function getNextSerialNumber(
 
 export async function appendLogRow(accessToken: string, row: SheetLogRow) {
   const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-  const range = process.env.GOOGLE_SHEET_RANGE ?? "Sheet1!A:J";
+  const range = process.env.GOOGLE_SHEET_RANGE ?? "'Outreach Tracker'!A:Z";
   const role = process.env.OUTREACH_ROLE ?? "DevOps Engineer";
   const platform = process.env.OUTREACH_PLATFORM ?? "Email";
   const followUpDays = Number.parseInt(process.env.FOLLOW_UP_DAYS ?? "5", 10);
@@ -118,7 +118,7 @@ export async function appendLogRow(accessToken: string, row: SheetLogRow) {
 
 export async function getContactsToFollowUp(accessToken: string) {
   const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-  const range = process.env.GOOGLE_SHEET_RANGE ?? "Sheet1!A:O";
+  const range = process.env.GOOGLE_SHEET_RANGE ?? "'Outreach Tracker'!A:Z";
 
   if (!spreadsheetId) throw new Error("GOOGLE_SHEET_ID missing");
 
@@ -138,9 +138,9 @@ export async function getContactsToFollowUp(accessToken: string) {
   today.setHours(0, 0, 0, 0);
 
   return rows
-    .slice(1) // Skip header
+    .slice(2) // Skip 2 rows (Title + Header)
     .map((row, index) => ({
-      rowIndex: index + 2, // 1-indexed + header
+      rowIndex: index + 3, // 1-indexed + 2 header rows
       serialNumber: row[0],
       name: row[1],
       company: row[2],
@@ -174,7 +174,7 @@ export async function updateLogRow(
 ) {
   const spreadsheetId = process.env.GOOGLE_SHEET_ID;
   const sheetName = getSheetNameFromRange(
-    process.env.GOOGLE_SHEET_RANGE ?? "Sheet1!A:N",
+    process.env.GOOGLE_SHEET_RANGE ?? "'Outreach Tracker'!A:Z",
   );
 
   if (!spreadsheetId) throw new Error("GOOGLE_SHEET_ID missing");
@@ -206,7 +206,7 @@ export async function updateLogRow(
 
 export async function getRecentLogs(accessToken: string, limit = 20) {
   const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-  const range = process.env.GOOGLE_SHEET_RANGE ?? "Sheet1!A:O";
+  const range = process.env.GOOGLE_SHEET_RANGE ?? "'Outreach Tracker'!A:Z";
 
   if (!spreadsheetId) throw new Error("GOOGLE_SHEET_ID missing");
 
@@ -222,12 +222,12 @@ export async function getRecentLogs(accessToken: string, limit = 20) {
   const rows = response.data.values ?? [];
   console.log(`[RecentLogs] SSheet: ${spreadsheetId}, Range: ${range}, Found: ${rows.length} rows`);
   
-  if (rows.length <= 1) return [];
+  if (rows.length === 0) return [];
 
   return rows
-    .slice(1)
+    .slice(2) // Skip 2 rows (Title + Header)
     .map((row, index) => ({
-      rowIndex: index + 2,
+      rowIndex: index + 3, // 1-indexed + 2 header rows
       serialNumber: row[0],
       name: row[1],
       company: row[2],
