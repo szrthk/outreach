@@ -12,6 +12,7 @@ export async function POST(request: Request) {
 
   try {
     const { role, company } = await request.json();
+    console.log(`Generating hook for: ${company} as ${role}`);
     const hook = await generatePersonalizedHook(
       role || "DevOps Engineer",
       company || "your company"
@@ -19,6 +20,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ hook });
   } catch (error) {
+    console.error("Hook Generation Error:", error);
     return NextResponse.json({ error: "AI failed to generate hook" }, { status: 500 });
   }
 }

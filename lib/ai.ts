@@ -12,32 +12,41 @@ export async function generateFollowUp(
   followUpNumber: number,
 ) {
   const prompt = `
-    You are a professional outreach assistant. 
-    You sent an original email to ${recipientName} at ${companyName}.
+    You are an expert executive assistant helping Sarthak Sagar, a seasoned DevOps & Site Reliability Engineer.
     
-    Original Email:
-    """
-    ${originalEmail}
-    """
+    CONTEXT:
+    Sarthak previously reached out to ${recipientName} at ${companyName}.
+    Original Template Used: """${originalEmail}"""
+    This is follow-up #${followUpNumber}.
     
-    This is follow-up number ${followUpNumber}.
+    OBJECTIVE:
+    Write a short, professional, and highly personalized follow-up email. 
+    It must feel human, empathetic, and low-pressure.
     
-    Task: Write a short, polite, and personalized follow-up email.
-    - If follow-up 1: Be gentle, just checking if they saw the previous email.
-    - If follow-up 2: Add a bit more value or express enthusiasm about their company.
-    - If follow-up 3: Mention this is the last time you'll reach out, and leave the door open.
+    TONE:
+    - Confident but humble.
+    - Insightful (mentions ${companyName}'s impact).
+    - Concise.
     
-    Guidelines:
-    - No subject line (it will be sent in a thread).
-    - Keep it under 3-4 sentences.
-    - Do not use placeholders like [Your Name]. Use "Sarthak Sagar".
-    - Tone: Professional, slightly casual, not "bot-like".
+    SEQUENCING GUIDELINES:
+    - Follow-up 1: "Just resurfacing this in case it got buried. I'm really impressed by ${companyName}'s current growth."
+    - Follow-up 2: "Thought of our last note. Given the current focus on reliability in ${companyName}'s space, I'd love to share some thoughts on infrastructure scaling."
+    - Follow-up 3 (Final): "I'll take the silence as 'now isn't the right time'. I'll keep an eye on ${companyName} from afar. Let's stay in touch!"
     
-    Respond with ONLY the email body text.
+    CONSTRAINTS:
+    - Respond with ONLY the email body.
+    - No subject lines.
+    - Sign off as "Sarthak Sagar".
+    - No placeholders like [Company Name].
   `;
 
-  const result = await model.generateContent(prompt);
-  return result.response.text().trim();
+  try {
+    const result = await model.generateContent(prompt);
+    return result.response.text().trim();
+  } catch (error) {
+    console.error("Follow-up Generation Error:", error);
+    throw error;
+  }
 }
 
 export async function generatePersonalizedHook(
@@ -45,19 +54,31 @@ export async function generatePersonalizedHook(
   companyName: string,
 ) {
   const prompt = `
-    You are a career expert and assistant for Sarthak Sagar, a DevOps Engineer.
-    Sarthak is applying for a ${role} role at ${companyName}.
+    You are a high-end recruiter and personal brand consultant for Sarthak Sagar, a DevOps Engineer.
+    Sarthak is approaching ${companyName} for a ${role} position.
     
-    Task: Write a single, high-impact sentence (personalized hook) that Sarthak can use in his email to ${companyName}.
-    - The hook should mention ${companyName}'s likely tech stack or a general compliment about their scale/impact.
-    - It should sound like Sarthak has done his research.
-    - Example: "I've been following ${companyName}'s work in scaling distributed systems and would love to contribute to your infrastructure team."
+    TASK: Generate a single, captivating "hook" sentence for the first line of an email.
+    The hook must:
+    1. Show deep research into ${companyName}.
+    2. Mention a specific technological challenge they likely face (e.g., scale, Kubernetes orchestration, CI/CD bottlenecks).
+    3. Sound completely natural, not like a template.
     
-    Respond with ONLY the sentence. No quotes.
+    EXAMPLES:
+    - "I've been closely following how ${companyName} is revolutionizing distributed storage, especially with the recent scale-up."
+    - "Your team's focus on zero-downtime deployments caught my eye, as it's an area I've been optimizing for the past 4 years."
+    
+    OUTPUT:
+    - Return ONLY the hook sentence.
+    - No quotes, no intro text.
   `;
 
-  const result = await model.generateContent(prompt);
-  return result.response.text().trim();
+  try {
+    const result = await model.generateContent(prompt);
+    return result.response.text().trim();
+  } catch (error) {
+    console.error("Hook Generation Error:", error);
+    throw error;
+  }
 }
 
 export async function analyzeSentiment(emailBody: string): Promise<SentimentResult> {

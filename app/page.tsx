@@ -142,15 +142,22 @@ export default function Home() {
       const response = await fetch("/api/ai/hook", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ company: single.company }),
+        body: JSON.stringify({ 
+          company: single.company,
+          role: "DevOps Engineer" 
+        }),
       });
       const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to generate hook");
+      }
       if (result.hook) {
         setAiHook(result.hook);
         addLog("success", "AI Hook generated!");
       }
     } catch (error) {
-      addLog("error", "Failed to generate AI hook.");
+      const msg = error instanceof Error ? error.message : "Failed to generate AI hook.";
+      addLog("error", msg);
     } finally {
       setIsGeneratingHook(false);
     }
@@ -286,9 +293,13 @@ export default function Home() {
         }),
       });
       const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to generate preview");
+      }
       setPreviewBody(data.body);
     } catch (error) {
-      addLog("error", "Failed to generate follow-up preview.");
+      const msg = error instanceof Error ? error.message : "Failed to generate follow-up preview.";
+      addLog("error", msg);
     } finally {
       setIsGeneratingPreview(false);
     }
