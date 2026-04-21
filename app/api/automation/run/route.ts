@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
     for (const contact of contacts) {
       const replies = await checkThreadForReplies(
-        accessToken!,
+        token,
         contact.threadId,
         contact.messageId,
       );
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
         const lastReply = replies[replies.length - 1];
         const sentiment = await analyzeSentiment(lastReply.snippet || "New reply received");
         
-        await updateLogRow(accessToken!, contact.rowIndex, {
+        await updateLogRow(token, contact.rowIndex, {
           status: `Replied (${sentiment})`,
           notes: `Reply detected on ${new Date().toLocaleDateString()}. Automation stopped.`,
           sentiment,
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
           );
 
           const { messageId } = await sendEmailWithAttachment({
-            accessToken: accessToken!,
+            accessToken: token,
             to: contact.email,
             subject: contact.subject,
             body: aiBody,
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
           const nextFollowUp = new Date();
           nextFollowUp.setDate(nextFollowUp.getDate() + 5);
 
-          await updateLogRow(accessToken!, contact.rowIndex, {
+          await updateLogRow(token, contact.rowIndex, {
             messageId,
             followUpCount: nextCount,
             followUpDate: nextFollowUp,
@@ -84,14 +84,14 @@ export async function POST(request: Request) {
           results.push({ email: contact.email, action: "sent-followup-auto", count: nextCount });
         } else {
           // Manual mode: Just flag it for the user
-          await updateLogRow(accessToken!, contact.rowIndex, {
+          await updateLogRow(token, contact.rowIndex, {
             status: "Follow-up Due",
             notes: "Follow-up is ready for manual review.",
           });
           results.push({ email: contact.email, action: "flagged-manual" });
         }
       } else {
-        await updateLogRow(accessToken!, contact.rowIndex, {
+        await updateLogRow(token, contact.rowIndex, {
           status: "Closed (No Reply)",
           notes: "Max follow-ups reached.",
         });

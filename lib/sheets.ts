@@ -5,7 +5,7 @@ export type SheetLogRow = {
   email: string;
   company: string;
   subject: string;
-  status: "sent" | "failed";
+  status: string; // Changed from literal to string to support "Replied (Interested)", etc.
   messageId?: string;
   threadId?: string;
   error?: string;
@@ -166,7 +166,6 @@ export async function updateLogRow(
   accessToken: string,
   rowIndex: number,
   updates: Partial<SheetLogRow> & {
-    status?: string;
     notes?: string;
     followUpDate?: Date;
   },
