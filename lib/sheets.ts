@@ -202,3 +202,84 @@ export async function updateLogRow(
   if (updates.followUpCount !== undefined) await writeValue("M", updates.followUpCount);
   if (updates.sentiment) await writeValue("N", updates.sentiment);
 }
+
+export async function getRecentLogs(accessToken: string, limit = 20) {
+  const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+  const range = process.env.GOOGLE_SHEET_RANGE ?? "Sheet1!A:N";
+
+  if (!spreadsheetId) throw new Error("GOOGLE_SHEET_ID missing");
+
+  const oauth2Client = new google.auth.OAuth2();
+  oauth2Client.setCredentials({ access_token: accessToken });
+  const sheets = google.sheets({ version: "v4", auth: oauth2Client });
+
+  const response = await sheets.spreadsheets.values.get({
+    spreadsheetId,
+    range,
+  });
+
+  const rows = response.data.values ?? [];
+  if (rows.length <= 1) return [];
+
+  return rows
+    .slice(1)
+    .reverse()
+    .slice(0, limit)
+    .map((row) => ({
+      serialNumber: row[0],
+      name: row[1],
+      company: row[2],
+      role: row[3],
+      platform: row[4],
+      email: row[5],
+      sentDate: row[6],
+      followUpDate: row[7],
+      status: row[8],
+      notes: row[9],
+      messageId: row[10],
+      threadId: row[11],
+      followUpCount: parseInt(row[12] || "0", 10),
+      sentiment: row[13] || "Neutral",
+    }));
+}
+
+export async function getAutomationConfig(accessToken: string) {
+  const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+  // We'll use a fixed cell far to the right to store the mode
+  const range = "Sheet1!Z1"; 
+
+  if (!spreadsheetId) throw new Error("GOOGLE_SHEET_ID missing");
+
+  const oauth2Client = new google.auth.OAuth2();
+  oauth2Client.setCredentials({ access_token: accessToken });
+  const sheets = google.sheets({ version: "v4", auth: oauth2Client });
+
+  try {
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range,
+    });
+    const value = response.data.values?.[0]?.[0];
+    return value === "automatic" ? "automatic" : "manual";
+  } catch {
+    return "manual";
+  }
+}
+
+export async function updateAutomationConfig(accessToken: string, mode: "automatic" | "manual") {
+  const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+  const range = "Sheet1!Z1";
+
+  if (!spreadsheetId) throw new Error("GOOGLE_SHEET_ID missing");
+
+  const oauth2Client = new google.auth.OAuth2();
+  oauth2Client.setCredentials({ access_token: accessToken });
+  const sheets = google.sheets({ version: "v4", auth: oauth2Client });
+
+  await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range,
+    valueInputOption: "RAW",
+    requestBody: { values: [[mode]] },
+  });
+}
