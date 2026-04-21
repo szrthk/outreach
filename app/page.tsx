@@ -70,6 +70,7 @@ export default function Home() {
   }]);
   
   const [recentLogs, setRecentLogs] = useState<RecentLog[]>([]);
+  const [currentSheetId, setCurrentSheetId] = useState("");
   const [automationMode, setAutomationMode] = useState<"automatic" | "manual">("manual");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<"outreach" | "command">("outreach");
@@ -90,8 +91,10 @@ export default function Home() {
       const data = await res.json();
       if (data.logs) setRecentLogs(data.logs);
       if (data.config) setAutomationMode(data.config);
+      if (data.spreadsheetId) setCurrentSheetId(data.spreadsheetId);
     } catch (error) {
-      console.error("Dashboard refresh failed");
+      addLog("error", "Dashboard sync failed. Please check your Google Sheet connection.");
+      console.error("Dashboard refresh failed", error);
     } finally {
       setIsRefreshing(false);
     }
@@ -542,7 +545,7 @@ export default function Home() {
                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={isRefreshing ? 'spin' : ''}><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
                    </button>
                    <a 
-                     href={`https://docs.google.com/spreadsheets/d/${process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID || '1JZOB8hGt13hm2lGJi_kQV6Ka5QGD4I6ShAjf8SUNpsY'}`} 
+                     href={`https://docs.google.com/spreadsheets/d/${currentSheetId || process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID || '1JZOB8hGt13hm2lGJi_kQV6Ka5QGD4I6ShAjf8SUNpsY'}`} 
                      target="_blank" 
                      rel="noreferrer"
                      className={styles.secondaryButton}

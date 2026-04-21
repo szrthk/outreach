@@ -220,6 +220,8 @@ export async function getRecentLogs(accessToken: string, limit = 20) {
   });
 
   const rows = response.data.values ?? [];
+  console.log(`[RecentLogs] SSheet: ${spreadsheetId}, Range: ${range}, Found: ${rows.length} rows`);
+  
   if (rows.length <= 1) return [];
 
   return rows

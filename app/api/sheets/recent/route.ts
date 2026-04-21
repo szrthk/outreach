@@ -12,7 +12,9 @@ export async function GET() {
     const config = await getAutomationConfig(session.accessToken);
     return NextResponse.json({ logs, config });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch dashboard data" }, { status: 500 });
+    console.error("Dashboard Fetch Error Detail:", error);
+    const message = error instanceof Error ? error.message : "Failed to fetch dashboard data";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
