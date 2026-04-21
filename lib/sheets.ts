@@ -158,9 +158,16 @@ export async function getContactsToFollowUp(accessToken: string) {
       subject: row[14],
     }))
     .filter((contact) => {
-      if (contact.status !== "No Reply") return false;
+      // Return ALL 'No Reply' contacts for reply detection, 
+      // but calculate 'isDue' for follow-up eligibility
+      return contact.status === "No Reply";
+    })
+    .map((contact) => {
       const fDate = new Date(contact.followUpDate);
-      return fDate <= today;
+      return {
+        ...contact,
+        isDue: fDate <= today,
+      };
     });
 }
 

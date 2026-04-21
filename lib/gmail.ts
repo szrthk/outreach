@@ -184,6 +184,9 @@ export async function checkThreadForReplies(
     metadataHeaders: ["From", "Message-ID"],
   });
 
+  const profile = await gmail.users.getProfile({ userId: "me" });
+  const myEmail = profile.data.emailAddress;
+
   const messages = response.data.messages || [];
   const lastIndex = messages.findIndex((m) => m.id === lastKnownMessageId);
 
@@ -192,7 +195,11 @@ export async function checkThreadForReplies(
   // Get messages AFTER our last sent message
   const newMessages = messages.slice(lastIndex + 1);
 
-  // Filter out messages SENT by us (if any)
-  // In a typical thread check, anything here from the recipient is a reply.
-  return newMessages;
+  // Filter out messages SENT by us (if any) and Drafts
+  return newMessages.filter((m) => {
+    const fromHeader = m.payload?.headers?.find((h) => h.name === "From")?.value;
+    const isFromMe = fromHeader && myEmail && fromHeader.includes(myEmail);
+    const isDraft = m.labelIds?.includes("DRAFT");
+    return !isFromMe && !isDraft;
+  });
 }

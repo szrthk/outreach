@@ -55,7 +55,8 @@ export async function POST(request: Request) {
         continue;
       }
 
-      if (contact.followUpCount < 3) {
+      // Only attempt automated follow-up if it's due and we are in automatic mode
+      if (contact.isDue && contact.followUpCount < 3) {
         if (mode === "automatic") {
           const nextCount = contact.followUpCount + 1;
           const aiBody = await generateFollowUp(

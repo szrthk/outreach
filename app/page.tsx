@@ -580,10 +580,15 @@ export default function Home() {
                             <td>{log.sentiment}</td>
                             <td>{log.followUpDate}</td>
                             <td>
-                               {log.status === "Follow-up Due" || log.status === "No Reply" ? (
-                                  <button onClick={() => openFollowUpModal(log)} className={styles.miniButton}>
-                                     Review
-                                  </button>
+                               {log.status === "No Reply" || log.status === "Follow-up Due" ? (
+                                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                     {new Date(log.followUpDate) <= new Date() && (
+                                        <span className={`${styles.badge} ${styles.badgeWarning}`} style={{fontSize: '0.7rem'}}>DUE</span>
+                                     )}
+                                     <button onClick={() => openFollowUpModal(log)} className={styles.miniButton} style={{ whiteSpace: 'nowrap' }}>
+                                        Manual Follow-up
+                                     </button>
+                                  </div>
                                ) : "-"}
                             </td>
                          </tr>
